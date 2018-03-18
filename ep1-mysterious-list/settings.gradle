@@ -1,0 +1,3 @@
+rootProject.name = 'ep1-mysterious-list'
+
+include 'schedule-reader'

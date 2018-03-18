@@ -1,0 +1,14 @@
+<schedule>
+    <talk>
+        <title>Корутины в Kotlin</title>
+        <author>Роман Елизаров</author>
+    </talk>
+    <talk>
+        <title>Spring Framework 5: feature highlights and hidden gems</title>
+        <author>Juergen Hoeller</author>
+    </talk>
+    <talk>
+        <title>Один раз в год сады цветут: разбор семантики «exactly-once» Apache Kafka</title>
+        <author>Виктор Гамов</author>
+    </talk>
+</schedule>
