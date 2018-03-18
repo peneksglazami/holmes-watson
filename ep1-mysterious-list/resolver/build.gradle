@@ -1,3 +1,4 @@
 jar {
+    archiveName = 'talk-complexity-resolver.jar'
     destinationDir = file("$rootDir/schedule-reader/libs")
 }
