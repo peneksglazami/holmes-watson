@@ -36,7 +36,7 @@ public class ScheduleFileReader {
                         break;
                 }
             }
-            talks.add(new Talk(title, author));
+            talks.add(new Talk(title, author, TalkComplexityResolver.resolveTalkComplexity(title)));
         }
 
         return talks;

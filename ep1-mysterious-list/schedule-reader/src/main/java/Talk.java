@@ -2,10 +2,12 @@ public class Talk {
 
     private String title;
     private String author;
+    private String complexity;
 
-    public Talk(String title, String author) {
+    public Talk(String title, String author, String complexity) {
         this.title = title;
         this.author = author;
+        this.complexity = complexity;
     }
 
     public String getTitle() {
@@ -14,5 +16,9 @@ public class Talk {
 
     public String getAuthor() {
         return author;
+    }
+
+    public String getComplexity() {
+        return complexity;
     }
 }
