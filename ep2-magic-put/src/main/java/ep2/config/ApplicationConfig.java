@@ -1,26 +1,23 @@
 package ep2.config;
 
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+@Configuration
+@EnableWebMvc
+@ComponentScan("ep2")
+public class ApplicationConfig {
 
-@ApplicationPath("/api")
-public class ApplicationConfig extends Application {
-
-    @Override
-    public Map<String, Object> getProperties() {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("jersey.config.server.provider.packages", "ep2");
-        return properties;
-    }
-
-    @Override
-    public Set<Class<?>> getClasses() {
-        return Collections.singleton(MultiPartFeature.class);
+    @Bean(name = "multipartResolver")
+    public CommonsMultipartResolver multipartResolver() {
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+        multipartResolver.setDefaultEncoding("utf-8");
+        multipartResolver.setMaxUploadSize(10000000);
+        multipartResolver.setMaxUploadSizePerFile(2000000);
+        multipartResolver.setResolveLazily(true);
+        return new CommonsMultipartResolver();
     }
 }

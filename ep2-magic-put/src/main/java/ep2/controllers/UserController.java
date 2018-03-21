@@ -2,42 +2,37 @@ package ep2.controllers;
 
 import ep2.model.User;
 import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
-import java.io.InputStream;
 
-@Path("/user")
+@RestController
+@RequestMapping("/user")
 public class UserController {
 
-    @GET
-    @Path("{login: \\w+}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public User getUser(@PathParam("login") String login) {
+    @GetMapping(value = "/{login}",
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @ResponseBody
+    public User getUser(@PathVariable("login") String login) {
         return new User(login, null, null);
     }
 
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.APPLICATION_JSON)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public User createUser(
-            @FormDataParam("login") String login,
-            @FormDataParam("file") InputStream uploadedFile,
-            @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException {
-        return new User(login, fileDetail.getFileName(), IOUtils.toByteArray(uploadedFile));
+            @RequestParam("login") String login,
+            @RequestParam("file") MultipartFile uploadedFile) throws IOException {
+        return new User(login, uploadedFile.getOriginalFilename(), IOUtils.toByteArray(uploadedFile.getInputStream()));
     }
 
-    @PUT
-    @Path("{login: \\w+}")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Produces(MediaType.APPLICATION_JSON)
+    @PutMapping(value = "/{login}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public User updateUser(
-            @PathParam("login") String login,
-            @FormDataParam("file") InputStream uploadedFile,
-            @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException {
-        return new User(login, fileDetail.getFileName(), IOUtils.toByteArray(uploadedFile));
+            @PathVariable("login") String login,
+            @RequestParam("file") MultipartFile uploadedFile) throws IOException {
+        return new User(login, uploadedFile.getOriginalFilename(), IOUtils.toByteArray(uploadedFile.getInputStream()));
     }
 }

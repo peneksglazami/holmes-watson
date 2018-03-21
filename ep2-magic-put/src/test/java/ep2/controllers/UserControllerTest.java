@@ -1,73 +1,84 @@
 package ep2.controllers;
 
-import ep2.model.User;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import org.glassfish.jersey.media.multipart.MultiPart;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.test.JerseyTest;
+import ep2.config.ApplicationConfig;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-import java.io.File;
+@RunWith(SpringRunner.class)
+@WebAppConfiguration
+@ContextConfiguration(classes = ApplicationConfig.class)
+public class UserControllerTest {
 
-import static javax.ws.rs.core.MediaType.MULTIPART_FORM_DATA_TYPE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+    @Autowired
+    private WebApplicationContext wac;
 
-public class UserControllerTest extends JerseyTest {
+    private MockMvc mockMvc;
 
-    @Override
-    public Application configure() {
-        ResourceConfig resourceConfig = new ResourceConfig(UserController.class);
-        resourceConfig.register(MultiPartFeature.class);
-        return resourceConfig;
-    }
-
-    @Override
-    protected void configureClient(ClientConfig clientConfig) {
-        clientConfig.register(MultiPartFeature.class);
-    }
-
-    @Test
-    public void getUser() {
-        Response res = target("/user/1").request().get();
-        User user = res.readEntity(User.class);
-
-        assertEquals("1", user.getLogin());
-    }
-
-    @Test
-    public void createUser() {
-        File file = new File(UserControllerTest.class.getClassLoader()
-                .getResource("watson.jpg").getFile());
-        FileDataBodyPart fileDataBodyPart = new FileDataBodyPart("file", file, new MediaType("image", "jpg"));
-        MultiPart entity = new FormDataMultiPart().field("login", "watson").bodyPart(fileDataBodyPart);
-        User user = target().path("/user").request()
-                .post(Entity.entity(entity, MULTIPART_FORM_DATA_TYPE), User.class);
-
-        assertEquals("watson", user.getLogin());
-        assertEquals("watson.jpg", user.getFilename());
-        assertNotNull(user.getPhoto());
+    @Before
+    public void setup() {
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
     @Test
-    public void updateUser() {
-        File file = new File(UserControllerTest.class.getClassLoader()
-                .getResource("holmes.jpg").getFile());
-        FileDataBodyPart fileDataBodyPart = new FileDataBodyPart("file", file, new MediaType("image", "jpg"));
-        MultiPart entity = new FormDataMultiPart().bodyPart(fileDataBodyPart);
-        User user = target().path("/user/holmes").request()
-                .put(Entity.entity(entity, MULTIPART_FORM_DATA_TYPE), User.class);
+    public void getUser() throws Exception {
+        mockMvc.perform(get("/user/1"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.login", is("1")))
+                .andDo(print());
+    }
 
-        assertEquals("holmes", user.getLogin());
-        assertEquals("holmes.jpg", user.getFilename());
-        assertNotNull(user.getPhoto());
+    @Test
+    public void createUser() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "watson.jpg", "image/jpg",
+                UserControllerTest.class.getClassLoader()
+                        .getResource("watson.jpg").openStream());
+
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/user")
+                .file(file)
+                .with(request -> {
+                    request.setMethod(HttpMethod.POST.name());
+                    return request;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .param("login", "watson"))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.login", is("watson")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.filename", is("watson.jpg")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.photo", notNullValue()));
+    }
+
+    @Test
+    public void updateUser() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "holmes.jpg", "image/jpg",
+                UserControllerTest.class.getClassLoader()
+                        .getResource("holmes.jpg").openStream());
+        mockMvc.perform(MockMvcRequestBuilders.fileUpload("/user/holmes")
+                .file(file)
+                .with(request -> {
+                    request.setMethod(HttpMethod.PUT.name());
+                    return request;
+                })
+                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andDo(print())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.login", is("holmes")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.filename", is("holmes.jpg")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.photo", notNullValue()));
     }
 }
