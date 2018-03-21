@@ -27,7 +27,7 @@ public class UserController {
         return new User(login, uploadedFile.getOriginalFilename(), IOUtils.toByteArray(uploadedFile.getInputStream()));
     }
 
-    @PutMapping(value = "/{login}",
+    @PostMapping(value = "/{login}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public User updateUser(

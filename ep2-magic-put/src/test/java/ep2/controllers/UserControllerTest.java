@@ -5,8 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -52,11 +50,6 @@ public class UserControllerTest {
 
         mockMvc.perform(MockMvcRequestBuilders.fileUpload("/user")
                 .file(file)
-                .with(request -> {
-                    request.setMethod(HttpMethod.POST.name());
-                    return request;
-                })
-                .contentType(MediaType.MULTIPART_FORM_DATA)
                 .param("login", "watson"))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.login", is("watson")))
@@ -70,12 +63,7 @@ public class UserControllerTest {
                 UserControllerTest.class.getClassLoader()
                         .getResource("holmes.jpg").openStream());
         mockMvc.perform(MockMvcRequestBuilders.fileUpload("/user/holmes")
-                .file(file)
-                .with(request -> {
-                    request.setMethod(HttpMethod.PUT.name());
-                    return request;
-                })
-                .contentType(MediaType.MULTIPART_FORM_DATA))
+                .file(file))
                 .andDo(print())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.login", is("holmes")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.filename", is("holmes.jpg")))
